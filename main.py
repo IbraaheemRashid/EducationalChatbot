@@ -1,14 +1,12 @@
-from document_parser import parse_document, clean_text, chunk_text
+from src.document_processing import parse_document, clean_text, chunk_text
 
 def main():
-    file_path = "/Users/ibraaheemrashid/Documents/EducationalChatbot/Resources/pdf/pdflatex-4-pages.pdf"
+    file_path = "testfiles/powerpoints/samplepptx.pptx"
     
     parsed_text = parse_document(file_path)
-    print(parsed_text)
     
     if parsed_text:
         cleaned_text = clean_text(parsed_text)
-        print(cleaned_text)
         chunks = chunk_text(cleaned_text)
         
         for i, chunk in enumerate(chunks):

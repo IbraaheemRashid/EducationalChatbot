@@ -82,8 +82,6 @@ def chunk_text(text, max_words=150):
 def parse_document(file_path):
     import os
     extension = os.path.splitext(file_path)[1].lower()
-    print(f"Parsing file with extension: {extension}")
-    print(f"File path provided: {file_path}")
 
     if extension == '.pdf':
         return parse_pdf(file_path)
