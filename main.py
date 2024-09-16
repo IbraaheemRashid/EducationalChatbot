@@ -20,7 +20,7 @@ def extract_key_sentences(text, num_sentences=3):
     return sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
 
 def main():
-    file_path = "testfiles/pdf/pdflatex-4-pages.pdf"
+    file_path = "testfiles/pdf/CS3ID Lecture 3.pdf"
     parsed_text = parse_document(file_path)
     
     if parsed_text:
