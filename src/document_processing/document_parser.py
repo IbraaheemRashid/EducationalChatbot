@@ -4,8 +4,9 @@ import nltk
 from PyPDF2 import PdfReader
 from pptx import Presentation
 from docx import Document
+from nltk.tokenize import sent_tokenize
 
-nltk.download('punkt_tab')
+nltk.download('punkt', quiet=True)
 
 def parse_pdf(file_path):
     try:
@@ -54,33 +55,22 @@ def clean_text(text):
         print(f"Error cleaning text: {e}")
         return None
 
-def chunk_text(text, max_words=150):
-    try:
-        sentences = nltk.sent_tokenize(text)
-        chunks = []
-        current_chunk = []
-        current_length = 0
+def chunk_text(text, chunk_size=100, overlap=20):
+    words = text.split()
+    chunks = []
+    start = 0
+    
+    while start < len(words):
+        end = start + chunk_size
+        chunk = ' '.join(words[start:end])
+        if chunk not in chunks:
+            chunks.append(chunk)
+        start += chunk_size - overlap
+    
+    return chunks
 
-        for sentence in sentences:
-            words = sentence.split()
-            if current_length + len(words) <= max_words:
-                current_chunk.append(sentence)
-                current_length += len(words)
-            else:
-                chunks.append(" ".join(current_chunk))
-                current_chunk = [sentence]
-                current_length = len(words)
-
-        if current_chunk:
-            chunks.append(" ".join(current_chunk))
-
-        return chunks
-    except Exception as e:
-        print(f"Error chunking text: {e}")
-        return []
 
 def parse_document(file_path):
-    import os
     extension = os.path.splitext(file_path)[1].lower()
 
     if extension == '.pdf':
@@ -92,3 +82,8 @@ def parse_document(file_path):
     else:
         raise ValueError(f"Unsupported file format: {extension}")
 
+def print_chunk_debug_info(chunks):
+    print(f"Number of chunks: {len(chunks)}")
+    print("First few chunks:")
+    for i, chunk in enumerate(chunks[:3]):
+        print(f"Chunk {i}: {chunk[:100]}...")  # Print first 100 characters of each chunk
