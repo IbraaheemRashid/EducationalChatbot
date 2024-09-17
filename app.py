@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Global variables to store the processed document and FAISS index
 processed_chunks = None
 faiss_index = None
 embedding_generator = None
@@ -30,36 +29,31 @@ def upload_file():
         return jsonify({'error': 'No selected file'})
     
     if file:
-        # Save the file temporarily
         filename = secure_filename(file.filename)
         temp_path = os.path.join('/tmp', filename)
         file.save(temp_path)
-        
-        # Process the uploaded file
+
         try:
             parsed_text = parse_document(temp_path)
             
             if parsed_text:
                 cleaned_text = clean_text(parsed_text)
                 processed_chunks = chunk_text(cleaned_text, chunk_size=100, overlap=10)
-                
-                # Initialize EmbeddingGenerator
+
                 embedding_generator = EmbeddingGenerator()
-                
-                # Create FAISS index
+
                 embedding_dim = embedding_generator.model.get_sentence_embedding_dimension()
                 faiss_index = create_faiss_index(embedding_dim)
-                
-                # Generate and store embeddings
+
                 process_and_store_document(processed_chunks, faiss_index, embedding_generator)
                 
-                os.remove(temp_path)  # Remove the temporary file
+                os.remove(temp_path)
                 return jsonify({'message': 'File processed successfully'})
             else:
-                os.remove(temp_path)  # Remove the temporary file
+                os.remove(temp_path)
                 return jsonify({'error': 'Failed to parse the document'})
         except Exception as e:
-            os.remove(temp_path)  # Remove the temporary file
+            os.remove(temp_path)
             return jsonify({'error': f'Error processing file: {str(e)}'})
 
 @app.route('/query', methods=['POST'])

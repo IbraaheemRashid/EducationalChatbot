@@ -14,38 +14,30 @@ nltk.download('stopwords', quiet=True)
 
 
 def extract_key_sentences(text, num_sentences=3, max_words_per_sentence=40):
-    # Clean and prepare the text
-    text = re.sub(r'\s+', ' ', text)  # Remove extra whitespace
+    text = re.sub(r'\s+', ' ', text)
     sentences = sent_tokenize(text)
-    
-    # Remove very short sentences (likely fragments)
+
     sentences = [s for s in sentences if len(s.split()) > 3]
-    
-    # Calculate word frequencies
+
     stop_words = set(stopwords.words('english'))
     words = [word.lower() for sentence in sentences for word in sentence.split() if word.lower() not in stop_words]
     freq_dist = FreqDist(words)
-    
-    # Score sentences
+
     sentence_scores = {}
     for sentence in sentences:
         score = sum(freq_dist[word.lower()] for word in sentence.split() if word.lower() not in stop_words)
         sentence_scores[sentence] = score / (len(sentence.split()) ** 0.5)  # Square root normalization
-    
-    # Select top sentences
+
     top_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
-    
-    # Sort sentences by their original order in the text
+
     top_sentences.sort(key=lambda s: sentences.index(s))
-    
-    # Split long sentences instead of truncating
+
     final_sentences = []
     for sentence in top_sentences:
         words = sentence.split()
         if len(words) <= max_words_per_sentence:
             final_sentences.append(sentence)
         else:
-            # Split the sentence into parts
             parts = []
             for i in range(0, len(words), max_words_per_sentence):
                 part = ' '.join(words[i:i + max_words_per_sentence])
@@ -64,10 +56,8 @@ def main():
         cleaned_text = clean_text(parsed_text)
         chunks = chunk_text(cleaned_text, chunk_size=60, overlap=10)
 
-        # Print debug info for chunks
         print_chunk_debug_info(chunks)
 
-        # Initialize EmbeddingGenerator
         embedding_generator = EmbeddingGenerator()
         
         # Create FAISS index
