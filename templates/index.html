@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+        h1 { color: #333; }
+        #file-upload, #query-input { margin-bottom: 20px; }
+        #chat-output { border: 1px solid #ddd; padding: 10px; min-height: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Educational Chatbot</h1>
+    <div id="file-upload">
+        <h2>Upload Document</h2>
+        <input type="file" id="document-file">
+        <button onclick="uploadFile()">Upload</button>
+    </div>
+    <div id="query-input">
+        <h2>Ask a Question</h2>
+        <input type="text" id="query" placeholder="Enter your question">
+        <button onclick="submitQuery()">Submit</button>
+    </div>
+    <div id="chat-output"></div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('document-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file to upload');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            axios.post('/upload', formData)
+                .then(response => {
+                    alert(response.data.message || 'File uploaded successfully');
+                })
+                .catch(error => {
+                    alert('Error uploading file: ' + error.response.data.error);
+                });
+        }
+
+        function submitQuery() {
+            const query = document.getElementById('query').value;
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            axios.post('/query', { query: query })
+                .then(response => {
+                    const output = document.getElementById('chat-output');
+                    output.innerHTML = '<h3>Key Sentences:</h3>';
+                    response.data.key_sentences.forEach((sentence, index) => {
+                        output.innerHTML += `<p>${index + 1}. ${sentence}</p>`;
+                    });
+                })
+                .catch(error => {
+                    alert('Error processing query: ' + error.response.data.error);
+                });
+        }
+    </script>
+</body>
+</html>
