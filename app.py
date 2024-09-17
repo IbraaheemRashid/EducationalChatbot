@@ -41,7 +41,7 @@ def upload_file():
             
             if parsed_text:
                 cleaned_text = clean_text(parsed_text)
-                processed_chunks = chunk_text(cleaned_text, chunk_size=60, overlap=10)
+                processed_chunks = chunk_text(cleaned_text, chunk_size=100, overlap=10)
                 
                 # Initialize EmbeddingGenerator
                 embedding_generator = EmbeddingGenerator()
@@ -77,7 +77,7 @@ def process_query():
     
     relevant_chunks = [processed_chunks[idx] for idx in top_chunk_indices]
     combined_chunks = " ".join(relevant_chunks)
-    key_sentences = extract_key_sentences(combined_chunks, num_sentences=3, max_words_per_sentence=40)
+    key_sentences = extract_key_sentences(combined_chunks, num_sentences=3, max_words_per_sentence=100)
     
     response = {
         'relevant_chunks': relevant_chunks,

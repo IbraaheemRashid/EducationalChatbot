@@ -12,13 +12,14 @@ nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 
 
+
 def extract_key_sentences(text, num_sentences=3, max_words_per_sentence=40):
     # Clean and prepare the text
     text = re.sub(r'\s+', ' ', text)  # Remove extra whitespace
     sentences = sent_tokenize(text)
     
     # Remove very short sentences (likely fragments)
-    sentences = [s for s in sentences if len(s.split()) > 5]
+    sentences = [s for s in sentences if len(s.split()) > 3]
     
     # Calculate word frequencies
     stop_words = set(stopwords.words('english'))
@@ -29,7 +30,7 @@ def extract_key_sentences(text, num_sentences=3, max_words_per_sentence=40):
     sentence_scores = {}
     for sentence in sentences:
         score = sum(freq_dist[word.lower()] for word in sentence.split() if word.lower() not in stop_words)
-        sentence_scores[sentence] = score / len(sentence.split())  # Normalize by sentence length
+        sentence_scores[sentence] = score / (len(sentence.split()) ** 0.5)  # Square root normalization
     
     # Select top sentences
     top_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
@@ -37,17 +38,23 @@ def extract_key_sentences(text, num_sentences=3, max_words_per_sentence=40):
     # Sort sentences by their original order in the text
     top_sentences.sort(key=lambda s: sentences.index(s))
     
-    # Truncate sentences if they're too long
-    truncated_sentences = []
+    # Split long sentences instead of truncating
+    final_sentences = []
     for sentence in top_sentences:
         words = sentence.split()
-        if len(words) > max_words_per_sentence:
-            truncated = ' '.join(words[:max_words_per_sentence]) + '...'
+        if len(words) <= max_words_per_sentence:
+            final_sentences.append(sentence)
         else:
-            truncated = sentence
-        truncated_sentences.append(truncated)
+            # Split the sentence into parts
+            parts = []
+            for i in range(0, len(words), max_words_per_sentence):
+                part = ' '.join(words[i:i + max_words_per_sentence])
+                if i + max_words_per_sentence < len(words):
+                    part += '...'
+                parts.append(part)
+            final_sentences.extend(parts)
     
-    return truncated_sentences
+    return final_sentences
 
 def main():
     file_path = "testfiles/pdf/CS3ID Lecture 3.pdf"
