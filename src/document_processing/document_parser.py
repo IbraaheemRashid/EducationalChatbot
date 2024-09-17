@@ -69,7 +69,6 @@ def chunk_text(text, chunk_size=100, overlap=20):
     
     return chunks
 
-
 def parse_document(file_path):
     extension = os.path.splitext(file_path)[1].lower()
 
